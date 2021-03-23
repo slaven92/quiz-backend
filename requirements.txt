@@ -28,3 +28,5 @@ uvicorn==0.13.4
 uvloop==0.15.2
 watchgod==0.7
 websockets==8.1
+SQLAlchemy==1.4.2
+psycopg2-binary==2.8.6
