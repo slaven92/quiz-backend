@@ -13,6 +13,7 @@ SQLALCHEMY_DATABASE_URL = os.environ['DATABASE_URL']
 
 #workaround for heroku
 name, rest = SQLALCHEMY_DATABASE_URL.split("://")
+# SQLALCHEMY_DATABASE_URL = name + "ql+psycopg2://" + rest
 SQLALCHEMY_DATABASE_URL = name + "ql://" + rest
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
