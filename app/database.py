@@ -5,13 +5,12 @@ from sqlalchemy.orm import sessionmaker
 import os
 
 
-
 # SQLALCHEMY_DATABASE_URL = "sqlite:///./sql_app.db"
 # SQLALCHEMY_DATABASE_URL = "postgresql://user:password@postgresserver/db"
-SQLALCHEMY_DATABASE_URL = os.environ['DATABASE_URL']
+SQLALCHEMY_DATABASE_URL = os.environ["DATABASE_URL"]
 
 
-#workaround for heroku
+# workaround for heroku
 name, rest = SQLALCHEMY_DATABASE_URL.split("://")
 # SQLALCHEMY_DATABASE_URL = name + "ql+psycopg2://" + rest
 SQLALCHEMY_DATABASE_URL = name + "ql://" + rest
