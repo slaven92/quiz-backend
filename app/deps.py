@@ -36,10 +36,14 @@ def get_current_user(
         payload = jwt.decode(
             token, SECRET_KEY, algorithms=[ALGORITHM]
         )
-        token_data = schemas.TokenPayload(**payload)
+        email: str = payload.get("sub")
+        if email is None:
+            raise credentials_exception
+        token_data = schemas.TokenPayload(email=email)
+
     except (jwt.JWTError, ValidationError):
         raise credentials_exception
-    user = crud.get_user_by_email(db, email=token_data.sub)
+    user = crud.get_user_by_email(db, email=token_data.email)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
@@ -48,15 +52,15 @@ def get_current_user(
 def get_current_active_user(
     current_user: models.User = Depends(get_current_user),
 ) -> models.User:
-    if not crud.user.is_active(current_user):
+    if not current_user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
 
 
 def get_current_active_superuser(
-    current_user: models.User = Depends(get_current_user),
+    current_user: models.User = Depends(get_current_active_user),
 ) -> models.User:
-    if not crud.user.is_superuser(current_user):
+    if not current_user.is_superuser:
         raise HTTPException(
             status_code=400, detail="The user doesn't have enough privileges"
         )
