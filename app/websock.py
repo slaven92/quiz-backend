@@ -3,16 +3,18 @@ from broadcaster import Broadcast
 
 import os
 
+WS_ENDPOINT = os.environ['WS_ENDPOINT']
+
 REDIS_URL = os.environ['REDIS_URL']
 broadcast = Broadcast(REDIS_URL)
 
-async def chatroom_ws_receiver(websocket):
+async def chatroom_ws_receiver(websocket, channel):
     async for message in websocket.iter_text():
-        await broadcast.publish(channel="chatroom", message=message)
+        await broadcast.publish(channel=channel, message=message)
 
 
-async def chatroom_ws_sender(websocket):
-    async with broadcast.subscribe(channel="chatroom") as subscriber:
+async def chatroom_ws_sender(websocket, channel):
+    async with broadcast.subscribe(channel=channel) as subscriber:
         async for event in subscriber:
             await websocket.send_text(event.message)
 
@@ -45,7 +47,7 @@ $(document).ready(function(){
 
   function join(name) {
     var host = window.location.host.split(':')[0];
-    var ws = new WebSocket("ws://localhost:5000/ws/1");
+    var ws = new WebSocket(""" + '"' + WS_ENDPOINT + """");
 
     var container = $('div#msgs');
     ws.onmessage = function(evt) {

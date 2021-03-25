@@ -96,10 +96,10 @@ def login_for_access_token(
 async def get():
     return HTMLResponse(html)
 
-@app.websocket("/ws/{client_id}")
-async def websocket_endpoint(websocket: WebSocket, client_id: int):
+@app.websocket("/ws/{channel}")
+async def websocket_endpoint(websocket: WebSocket, channel: str):
     await websocket.accept()
     await run_until_first_complete(
-        (chatroom_ws_receiver, {"websocket": websocket}),
-        (chatroom_ws_sender, {"websocket": websocket}),
+        (chatroom_ws_receiver, {"websocket": websocket, "channel": channel}),
+        (chatroom_ws_sender, {"websocket": websocket, "channel": channel}),
     )
