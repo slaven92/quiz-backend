@@ -1,20 +1,21 @@
+from datetime import datetime, timedelta
 from typing import List
 
-from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi import Depends, FastAPI, HTTPException, WebSocket, status
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
+from starlette.concurrency import run_until_first_complete
 
 from . import crud, models, schemas
 from .database import engine
-
-from .deps import get_db, get_current_active_user
-
-from fastapi.security import OAuth2PasswordRequestForm
-from datetime import datetime, timedelta
-
+from .deps import get_current_active_user, get_db
 from .security import ACCESS_TOKEN_EXPIRE_MINUTES, create_access_token
+from .websock import broadcast, chatroom_ws_receiver, chatroom_ws_sender, html
 
-models.Base.metadata.create_all(bind=engine)
-app = FastAPI()
+from fastapi.responses import HTMLResponse
+
+# models.Base.metadata.create_all(bind=engine)
+app = FastAPI(on_startup=[broadcast.connect], on_shutdown=[broadcast.disconnect])
 
 
 @app.post("/users/", response_model=schemas.User)
@@ -89,3 +90,16 @@ def login_for_access_token(
         data={"sub": user.email}, expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}
+
+
+@app.get("/")
+async def get():
+    return HTMLResponse(html)
+
+@app.websocket("/ws/{client_id}")
+async def websocket_endpoint(websocket: WebSocket, client_id: int):
+    await websocket.accept()
+    await run_until_first_complete(
+        (chatroom_ws_receiver, {"websocket": websocket}),
+        (chatroom_ws_sender, {"websocket": websocket}),
+    )
