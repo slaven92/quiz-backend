@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 
 
 # Shared properties
@@ -21,13 +21,9 @@ class ItemUpdate(ItemBase):
 
 # Properties shared by models stored in DB
 class ItemInDBBase(ItemBase):
-    id: int
+    id: Optional[str] = None
     title: str
-    owner_id: int
-
-    class Config:
-        orm_mode = True
-
+    owner_id: str
 
 # Properties to return to client
 class Item(ItemInDBBase):
@@ -57,11 +53,7 @@ class UserUpdate(UserBase):
 
 
 class UserInDBBase(UserBase):
-    id: Optional[int] = None
-
-    class Config:
-        orm_mode = True
-
+    id: Optional[str] = None
 
 # Additional properties to return via API
 class User(UserInDBBase):

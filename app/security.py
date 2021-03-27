@@ -6,11 +6,8 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
-from pydantic import ValidationError
-from sqlalchemy.orm import Session
 
-from . import crud, models, schemas
-from .database import SessionLocal
+from . import crud, schemas
 
 # to get a string like this run:
 # openssl rand -hex 32
